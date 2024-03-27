@@ -1,7 +1,8 @@
 from bson import ObjectId 
 
-from models import AlphabetCourse
-from models import Letter
+from ..models import AlphabetCourse
+from ..models import Letter
+
 
 def CreateAlphabetCourseForUser(usersid: ObjectId):
     baseAlphabetCourse = AlphabetCourse(

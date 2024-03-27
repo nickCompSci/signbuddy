@@ -1,13 +1,13 @@
 from jose import jwt
 from dotenv import load_dotenv
-from os import getenv
+from .FetchSecrets import fetchSecrets
 
 load_dotenv()
 
-JWT_APPLICATION_AUDIENCE=getenv("JWT_APPLICATION_AUDIENCE")
-JWT_APPLICATION_ISSUER=getenv("JWT_APPLICATION_ISSUER")
-JWT_APPLICATION_KEY=getenv("JWT_APPLICATION_KEY")
-JWT_ALGORITHMS=getenv("JWT_ALGORITHMS")
+JWT_APPLICATION_AUDIENCE=fetchSecrets("JWT_APPLICATION_AUDIENCE")
+JWT_APPLICATION_ISSUER=fetchSecrets("JWT_APPLICATION_ISSUER")
+JWT_APPLICATION_KEY=fetchSecrets("JWT_APPLICATION_KEY")
+JWT_ALGORITHMS=fetchSecrets("JWT_ALGORITHMS")
 
 def decodeJwt(token:str):
   try:

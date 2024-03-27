@@ -13,32 +13,33 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import Response
 
-from services import AsyncHttpClient
-from helpers import CreateAlphabetCourseForUser
-from models import  AlphabetCourse, LetterRequest, LetterResponse, PatchLetter
-from security import authenticateUser, obtainModelBearerToken, decodeJwt
+
+from .services import AsyncHttpClient
+from .helpers import CreateAlphabetCourseForUser
+from .models import  AlphabetCourse, LetterRequest, LetterResponse, PatchLetter
+from .security import authenticateUser, obtainModelBearerToken, decodeJwt, fetchSecrets
 
 app = FastAPI()
 load_dotenv()
 
-LETTER_INFERENCE_API_URL = os.getenv("LETTER_INFERENCE_URL")
-AUTH0_MANAGEMENT_API_ENDPOINT = os.getenv("AUTH0_MANAGEMENT_ENDPOINT")
-MONGODB_URI = f"{os.getenv('MONGO_URI_FULL')}retryWrites=true&w=majority&appName={os.getenv('MONGO_URI_APPNAME')}"
+LETTER_INFERENCE_API_URL = fetchSecrets("LETTER_INFERENCE_URL")
+AUTH0_MANAGEMENT_API_ENDPOINT = fetchSecrets("AUTH0_MANAGEMENT_ENDPOINT")
+MONGODB_URI = f"{fetchSecrets('MONGO_URI_FULL')}retryWrites=true&w=majority&appName={fetchSecrets('MONGO_URI_APPNAME')}"
 
 MONGODB_CLIENT = AsyncIOMotorClient(MONGODB_URI)
-MONGODB_ENGINE = AIOEngine(client=MONGODB_CLIENT, database=os.getenv('MONGO_DBNAME'))
+MONGODB_ENGINE = AIOEngine(client=MONGODB_CLIENT, database=fetchSecrets('MONGO_DBNAME'))
 
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
 
 origins = [
-    os.getenv("ALLOWED_ORIGINS")
+    fetchSecrets("ALLOWED_ORIGINS")
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
+    allow_methods=["GET", "POST", "OPTIONS"],
     allow_headers=["*"],
 )
 
