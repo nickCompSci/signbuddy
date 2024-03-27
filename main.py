@@ -23,7 +23,7 @@ load_dotenv()
 
 LETTER_INFERENCE_API_URL = os.getenv("LETTER_INFERENCE_URL")
 AUTH0_MANAGEMENT_API_ENDPOINT = os.getenv("AUTH0_MANAGEMENT_ENDPOINT")
-MONGODB_URI = os.getenv('MONGO_URI_FULLS')
+MONGODB_URI = f"{os.getenv('MONGO_URI_FULL')}retryWrites=true&w=majority&appName={os.getenv('MONGO_URI_APPNAME')}"
 
 MONGODB_CLIENT = AsyncIOMotorClient(MONGODB_URI)
 MONGODB_ENGINE = AIOEngine(client=MONGODB_CLIENT, database=os.getenv('MONGO_DBNAME'))
