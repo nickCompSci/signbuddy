@@ -19,10 +19,12 @@ from .helpers import CreateAlphabetCourseForUser
 from .models import  AlphabetCourse, LetterRequest, LetterResponse, PatchLetter
 from .security import authenticateUser, obtainModelBearerToken, decodeJwt, fetchSecrets
 
+
 app = FastAPI()
 load_dotenv()
 
-LETTER_INFERENCE_API_URL = fetchSecrets("LETTER_INFERENCE_URL")
+LETTER_INFERENCE_API_URL = fetchSecrets("LETTER_INFERENCE_API_URL")
+
 AUTH0_MANAGEMENT_API_ENDPOINT = fetchSecrets("AUTH0_MANAGEMENT_ENDPOINT")
 MONGODB_URI = f"{fetchSecrets('MONGO_URI_FULL')}retryWrites=true&w=majority&appName={fetchSecrets('MONGO_URI_APPNAME')}"
 
@@ -52,15 +54,16 @@ async def decode_jwt(token: Annotated[str, Depends(OAUTH2_SCHEME)]):
     )
     try:
         payload = decodeJwt(token=token)
+
     except Exception:
         raise credentials_exception
 
     isUsersId = payload.get("sub")
-    
+
     if isUsersId is None:
         raise credentials_exception
     user = await authenticateUser(isUsersId)
-    
+
     if user is None:
         raise credentials_exception
 
@@ -68,13 +71,10 @@ async def decode_jwt(token: Annotated[str, Depends(OAUTH2_SCHEME)]):
 
 @app.get("/alphabetcourse", status_code=status.HTTP_200_OK)
 async def alphabet_course(current_user: Annotated[object, Depends(decode_jwt)], response: Response):
-    print(current_user)
     try:
         currentUsersId = current_user["user_id"]
         actualId = currentUsersId.split('|')[1]
-        print(actualId)
         usersAlphabet = await MONGODB_ENGINE.find_one(AlphabetCourse, AlphabetCourse.id==ObjectId(actualId))
-        print(usersAlphabet)
         if usersAlphabet:
             return {"alphabet": usersAlphabet}
     except Exception:
@@ -86,7 +86,7 @@ async def check_course(current_user: Annotated[object, Depends(decode_jwt)],resp
     try:
         currentUsersId = current_user["user_id"]
         actualId = currentUsersId.split('|')[1]
-        print(currentUsersId, "\n")
+        
         usersAlphabet = await MONGODB_ENGINE.find_one(AlphabetCourse, AlphabetCourse.id==ObjectId(actualId))
         if usersAlphabet:
             return
@@ -102,27 +102,24 @@ async def check_course(current_user: Annotated[object, Depends(decode_jwt)],resp
 async def checkletter(current_user: Annotated[object, Depends(decode_jwt)], incomingLetter: LetterRequest, request: Request):
     currentUsersId = current_user["user_id"]
     actualId = ObjectId(currentUsersId.split('|')[1])
-    
-    signBuddyModelBearerToken = await obtainModelBearerToken()
 
+    signBuddyModelBearerToken = await obtainModelBearerToken()
+ 
     userLetter = incomingLetter.letter
     modelApiResponseResult = ""
     jsonDataToSend = {"image": incomingLetter.image, "letter": userLetter}
     
     async with AsyncHttpClient() as client:
         modelApiResponseResult = await client.post_image(LETTER_INFERENCE_API_URL, data=jsonDataToSend, bearerToken=signBuddyModelBearerToken)
-        print(modelApiResponseResult, "********1")
-    print(modelApiResponseResult, "********2")
+
      
     # obtain users alphabet course
     users_alphabet_course = await MONGODB_ENGINE.find_one(AlphabetCourse, AlphabetCourse.id==actualId)
-  
     isUserLetterCorrect = modelApiResponseResult["letterResult"]
     
     newSuccessfulAttempts = users_alphabet_course.letters[userLetter].successfulAttempts
     newTotalSuccessfulAttempts = users_alphabet_course.letters[userLetter].totalSuccessful
     newFailedAttempts = users_alphabet_course.letters[userLetter].failedAttempts
-    print("current stored failed attempts", newFailedAttempts)
     isUserCompleted = users_alphabet_course.letters[userLetter].completed
     date = users_alphabet_course.letters[userLetter].date_completed;
     if isUserLetterCorrect == 1:
@@ -133,10 +130,8 @@ async def checkletter(current_user: Annotated[object, Depends(decode_jwt)], inco
     else:
         if not isUserCompleted == 1:
             newFailedAttempts +=1
-            print("updated failedattempts", newFailedAttempts)
             if newFailedAttempts >= users_alphabet_course.letters[userLetter].failQuota:
                 newSuccessfulAttempts = 0
-                print("got here")
                 newFailedAttempts = 0
     newTotalAttempts = users_alphabet_course.letters[userLetter].totalAttempts + 1
     
@@ -150,7 +145,6 @@ async def checkletter(current_user: Annotated[object, Depends(decode_jwt)], inco
             newCurrentProgress = 100
         patchDict = {"progress": newCurrentProgress}
         users_alphabet_course.model_update(patchDict)
-        # todo can we remove the below database call?
         await MONGODB_ENGINE.save(users_alphabet_course)
 
     patchObject = PatchLetter(completed=isUserCompleted, successfulAttempts=newSuccessfulAttempts, failedAttempts=newFailedAttempts, totalSuccessful=newTotalSuccessfulAttempts, totalAttempts=newTotalAttempts, date_completed=date)

@@ -11,7 +11,6 @@ class AsyncHttpClient:
         await self.close()
 
     async def post_image(self, url, data, bearerToken):
-        print(bearerToken)
         headers = {
             'content-type': "application/json",
             'authorization': f"Bearer {bearerToken}"

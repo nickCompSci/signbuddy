@@ -9,3 +9,6 @@ venv
 __pycache__
 *__pycache__
 secrets*
+secrets
+.secrets*
+.secrets
