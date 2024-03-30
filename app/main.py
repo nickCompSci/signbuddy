@@ -104,7 +104,7 @@ async def checkletter(current_user: Annotated[object, Depends(decode_jwt)], inco
     actualId = ObjectId(currentUsersId.split('|')[1])
 
     signBuddyModelBearerToken = await obtainModelBearerToken()
- 
+  
     userLetter = incomingLetter.letter
     modelApiResponseResult = ""
     jsonDataToSend = {"image": incomingLetter.image, "letter": userLetter}
@@ -153,6 +153,6 @@ async def checkletter(current_user: Annotated[object, Depends(decode_jwt)], inco
 
     users_alphabet_course.model_update(users_alphabet_course.letters[userLetter])
     await MONGODB_ENGINE.save(users_alphabet_course)
-    letterResponse = LetterResponse(letterResult=patchObject, resultImage=modelApiResponseResult["image"])
+    letterResponse = LetterResponse(letterResult=patchObject, resultImage=modelApiResponseResult["image"], letterAttempt=modelApiResponseResult["letterResult"])
     return letterResponse
     
