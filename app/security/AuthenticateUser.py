@@ -27,6 +27,11 @@ async def authenticateUser(usersId):
         user = await getUser(usersId, auth0BearerToken)
       else:
           user = userTemp
+  else:
+      auth0BearerToken = await obtainMangementApiToken()
+      newToken = managementToken(id=ObjectId(MONGO_MAPI_TOKEN_ID), access_token=auth0BearerToken)
+      await MONGODB_ENGINE.save(newToken)
+      
   return user
 
 async def obtainMangementApiToken():

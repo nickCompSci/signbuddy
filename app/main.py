@@ -14,7 +14,7 @@ from fastapi.responses import Response
 from .services import AsyncHttpClient, MONGODB_ENGINE
 from .helpers import CreateAlphabetCourseForUser, fetchSecrets
 from .models import  AlphabetCourse, LetterRequest, LetterResponse, PatchLetter
-from .security import authenticateUser, obtainModelBearerToken, decodeJwt
+from .security import authenticateUser, sendLetterForResult, decodeJwt
 
 
 app = FastAPI()
@@ -96,16 +96,16 @@ async def checkletter(current_user: Annotated[object, Depends(decode_jwt)], inco
     currentUsersId = current_user["user_id"]
     actualId = ObjectId(currentUsersId.split('|')[1])
 
-    signBuddyModelBearerToken = await obtainModelBearerToken()
-  
+
     userLetter = incomingLetter.letter
     modelApiResponseResult = ""
     jsonDataToSend = {"image": incomingLetter.image, "letter": userLetter}
     
-    async with AsyncHttpClient() as client:
-        modelApiResponseResult = await client.post_image(LETTER_INFERENCE_API_URL, data=jsonDataToSend, bearerToken=signBuddyModelBearerToken)
+    try:
+        modelApiResponseResult = await sendLetterForResult(jsonDataToSend=jsonDataToSend)
+    except Exception as ex:
+        raise ex
 
-     
     # obtain users alphabet course
     users_alphabet_course = await MONGODB_ENGINE.find_one(AlphabetCourse, AlphabetCourse.id==actualId)
     isUserLetterCorrect = modelApiResponseResult["letterResult"]

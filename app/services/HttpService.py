@@ -16,6 +16,8 @@ class AsyncHttpClient:
             'authorization': f"Bearer {bearerToken}"
         }
         async with self._session.post(url, json=data, headers=headers ) as r:
+            if r.status == 401:
+                return None
             return await r.json()
         
     async def post_auth0_management_api_token(self, url, data):

@@ -1,4 +1,4 @@
 from .AuthenticateUser import authenticateUser
-from .ObtainModelBearerToken import obtainModelBearerToken
+from .ObtainModelBearerToken import sendLetterForResult
 from .DecodeJwt import decodeJwt
 from..helpers.FetchSecrets import fetchSecrets
