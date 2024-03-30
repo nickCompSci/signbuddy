@@ -34,6 +34,8 @@ class AsyncHttpClient:
             'authorization': f"Bearer {bearerToken}"
         }
         async with self._session.get(url, data=data, headers=headers ) as r:
+            if r.status != 200:
+                return None
             return await r.json()
 
     async def close(self) -> None:

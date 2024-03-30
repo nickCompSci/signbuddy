@@ -1,23 +1,20 @@
-import os
 from datetime import datetime
 
 from bson import ObjectId 
 
 from typing import Annotated
 from dotenv import load_dotenv
-from jose import jwt
-from motor.motor_asyncio import AsyncIOMotorClient
-from odmantic import AIOEngine
+
 from fastapi import  FastAPI, Depends, HTTPException, status, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import Response
 
 
-from .services import AsyncHttpClient
-from .helpers import CreateAlphabetCourseForUser
+from .services import AsyncHttpClient, MONGODB_ENGINE
+from .helpers import CreateAlphabetCourseForUser, fetchSecrets
 from .models import  AlphabetCourse, LetterRequest, LetterResponse, PatchLetter
-from .security import authenticateUser, obtainModelBearerToken, decodeJwt, fetchSecrets
+from .security import authenticateUser, obtainModelBearerToken, decodeJwt
 
 
 app = FastAPI()
@@ -26,10 +23,6 @@ load_dotenv()
 LETTER_INFERENCE_API_URL = fetchSecrets("LETTER_INFERENCE_API_URL")
 
 AUTH0_MANAGEMENT_API_ENDPOINT = fetchSecrets("AUTH0_MANAGEMENT_ENDPOINT")
-MONGODB_URI = f"{fetchSecrets('MONGO_URI_FULL')}retryWrites=true&w=majority&appName={fetchSecrets('MONGO_URI_APPNAME')}"
-
-MONGODB_CLIENT = AsyncIOMotorClient(MONGODB_URI)
-MONGODB_ENGINE = AIOEngine(client=MONGODB_CLIENT, database=fetchSecrets('MONGO_DBNAME'))
 
 OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="token")
 

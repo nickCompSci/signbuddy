@@ -1,6 +1,6 @@
 from ..services import AsyncHttpClient
 from dotenv import load_dotenv
-from .FetchSecrets import fetchSecrets
+from ..helpers import fetchSecrets
 
 load_dotenv()
 

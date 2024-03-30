@@ -1,4 +1,4 @@
-from .helpers import CreateAlphabetCourseForUser
+from .helpers import CreateAlphabetCourseForUser, fetchSecrets
 from .models import Letter, AlphabetCourse, LetterRequest, LetterResponse, PatchLetter
-from .security import authenticateUser, obtainModelBearerToken, decodeJwt, fetchSecrets
+from .security import authenticateUser, obtainModelBearerToken, decodeJwt
 from .services import AsyncHttpClient
