@@ -14,7 +14,6 @@ AUTH0_MANAGEMENT_ENDPOINT=fetchSecrets("AUTH0_MANAGEMENT_ENDPOINT")
 MONGO_MODEL_API_TOKEN_ID=fetchSecrets("MONGO_MODEL_API_TOKEN_ID")
 LETTER_INFERENCE_API_URL=fetchSecrets("LETTER_INFERENCE_API_URL")
 
-# same principle as before
 async def sendLetterForResult(jsonDataToSend):
 
   result = await MONGODB_ENGINE.find_one(ModelToken, ModelToken.id== ObjectId(MONGO_MODEL_API_TOKEN_ID))
@@ -22,7 +21,7 @@ async def sendLetterForResult(jsonDataToSend):
   if result:
     signBuddyModelBearerToken = result.access_token
     letterRequestResult = await sendLetter(jsonDataToSend=jsonDataToSend, signBuddyModelBearerToken=signBuddyModelBearerToken)
-    if letterRequestResult == None:
+    if letterRequestResult is None:
       signBuddyModelBearerToken = await obtainToken()
       letterRequestResult = await sendLetter(jsonDataToSend=jsonDataToSend, signBuddyModelBearerToken=signBuddyModelBearerToken)
     return letterRequestResult

@@ -11,7 +11,7 @@ from fastapi.security import OAuth2PasswordBearer
 from fastapi.responses import Response
 
 
-from .services import AsyncHttpClient, MONGODB_ENGINE
+from .services import MONGODB_ENGINE
 from .helpers import CreateAlphabetCourseForUser, fetchSecrets
 from .models import  AlphabetCourse, LetterRequest, LetterResponse, PatchLetter
 from .security import authenticateUser, sendLetterForResult, decodeJwt
